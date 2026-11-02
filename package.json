@@ -1,6 +1,6 @@
 {
   "name": "beautify-opencode",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OpenCode TUI skin: btop-style rounded boxes, titles in the border and ■ meter bars for what is already on screen. Adds nothing, follows your theme.",
   "keywords": [
     "opencode",
