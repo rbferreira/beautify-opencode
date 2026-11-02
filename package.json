@@ -1,0 +1,50 @@
+{
+  "name": "beautify-opencode",
+  "version": "0.1.0",
+  "description": "OpenCode TUI skin: btop-style rounded boxes, titles in the border and ■ meter bars for what is already on screen. Adds nothing, follows your theme.",
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "tui",
+    "theme",
+    "skin",
+    "btop",
+    "opentui"
+  ],
+  "homepage": "https://github.com/rbferreira/beautify-opencode#readme",
+  "bugs": {
+    "url": "https://github.com/rbferreira/beautify-opencode/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rbferreira/beautify-opencode.git"
+  },
+  "license": "MIT",
+  "author": "Rafael Ferreira",
+  "type": "module",
+  "exports": {
+    "./tui": "./src/tui.js"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "preview": "BUN_BE_BUN=1 opencode test/preview.mjs preview.html"
+  },
+  "peerDependencies": {
+    "@opentui/core": ">=0.5.11"
+  },
+  "peerDependenciesMeta": {
+    "@opentui/core": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@opentui/core": "0.5.11"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
