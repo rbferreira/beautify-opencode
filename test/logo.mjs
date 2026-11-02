@@ -7,37 +7,7 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { BoxRenderable, RGBA, TextRenderable } from "@opentui/core"
 import { createTestRenderer } from "@opentui/core/testing"
 import { createSkin } from "../src/skin.js"
-
-const OPEN = ["                   ", "█▀▀█ █▀▀█ █▀▀█ █▀▀▄", "█  █ █  █ █▀▀▀ █  █", "▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀"]
-const CODE = ["             ▄     ", "█▀▀▀ █▀▀█ █▀▀█ █▀▀█", "█    █  █ █  █ █▀▀▀", "▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀"]
-// Letter interiors (row 2 spaces between strokes) carry a darker shadow bg.
-const tone = {
-  open: { fg: "#7d7d7d", shadow: "#3c3c3c" },
-  code: { fg: "#eeeeee", shadow: "#5e5e5e" },
-}
-
-function half(ctx, rows, row, t) {
-  const box = new BoxRenderable(ctx, { flexDirection: "row", width: 19, height: 1 })
-  const line = rows[row]
-  ;[...line].forEach((ch, i) => {
-    const inLetter = row === 2 && ch === " " && line[i - 1] !== " " && i % 5 !== 4
-    box.add(new TextRenderable(ctx, { content: ch, fg: t.fg, bg: inLetter ? t.shadow : undefined }))
-  })
-  return box
-}
-
-function buildLogo(ctx) {
-  const screen = new BoxRenderable(ctx, { width: 45, height: 6, backgroundColor: "#0a0a0a", alignItems: "center", justifyContent: "center" })
-  const logo = new BoxRenderable(ctx, { flexDirection: "column", width: 39, height: 4 })
-  for (let r = 0; r < 4; r++) {
-    const row = new BoxRenderable(ctx, { flexDirection: "row", width: 39, height: 1, gap: 1 })
-    row.add(half(ctx, OPEN, r, tone.open))
-    row.add(half(ctx, CODE, r, tone.code))
-    logo.add(row)
-  }
-  screen.add(logo)
-  return screen
-}
+import { buildLogo, realTheme, realThemeJson, revive } from "./scene.mjs"
 
 const hex = (rgba) => {
   const [r, g, b, a] = rgba.toInts()
@@ -68,12 +38,8 @@ async function capture(withSkin, options, themeFn = () => ({}), switchTo) {
   return out
 }
 
-// The user's real resolved theme (captured from the live TUI), hex → RGBA.
-const revive = (v) =>
-  typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v) ? RGBA.fromHex(v)
-  : v && typeof v === "object" ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, revive(x)])) : v
-const real = JSON.parse(readFileSync(new URL("./fixture-theme.json", import.meta.url), "utf8")).theme
-const mine = () => revive(real)
+const real = realThemeJson
+const mine = realTheme
 const greenAccent = () => revive({ ...real, hue: { ...real.hue, accent: real.hue.green } })
 const VARIANTS = [
   ["seu tema · accent (padrão)", { logoGradient: "theme" }, mine],

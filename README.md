@@ -2,36 +2,31 @@
 
 A skin for the [OpenCode](https://opencode.ai) TUI that makes what is **already
 on screen** look like [btop](https://github.com/aristocratos/btop): rounded
-boxes with the title set into the top border, `■` meter bars, a gradient logo.
+boxes with the title set into the top border, square meter bars, a gradient logo.
 
 It **adds nothing**. No new panels, gauges or widgets. It only restyles what
 OpenCode and your other plugins already draw, and every colour comes from your
 active theme. Switch themes and the skin follows.
 
-```
-╭─┐Context┌──────────────────╮      ╭─┐ ▼ Magic Context ┌──┐v0.49┌─╮
-│ 42.1K tokens · 21% used    │      │ ■■■■■■■■■■■■■■■■■■■■■■■■■■ │
-│ $0.18 spent                │      │ System 12% · Tools 31% …    │
-╰────────────────────────────╯      ╰─────────────────────────────╯
-╭─┐Checklist┌────────────────╮
-│ ■■■■■■■■■■■■■■■■ 60%       │
-│ ✓ parse the config         │
-╰────────────────────────────╯
-```
+<p align="center"><img src="https://raw.githubusercontent.com/rbferreira/beautify-opencode/main/docs/img/hero.png" alt="OpenCode session with beautify-opencode: sidebar sections drawn as btop-style boxes with titles in the border and square meter bars" width="900"></p>
+
+<p align="center"><sub>Rendered by the plugin itself on OpenTUI, with a theme captured from a live OpenCode session (see <a href="#development">Development</a>).</sub></p>
 
 ## What it restyles
 
 - **Cards.** Bordered boxes get rounded corners and a border tinted with
   their own title colour. The header row moves into the top border, btop
-  style: `╭─┐ ▼ Title ┌────┐ v1.2 ┌─╮`. Clicks on the border row still reach
-  the original header, so collapse toggles keep working.
+  style, with the version label on the right. Clicks on the border row still
+  reach the original header, so collapse toggles keep working.
 - **Sidebar sections.** The host's *Context* and *MCP* sections, and plugin
   sections such as Checklist-to-Goal, get boxed the same way, even though they
   draw no border of their own.
-- **Bars.** Magic-context's segmented token bar and any `██████░░░░` text
-  bar (Checklist-to-Goal, recomp progress…) are repainted as `■` meter cells.
+- **Bars.** Magic-context's segmented token bar and any block-character text
+  bar (Checklist-to-Goal, recomp progress…) are repainted as btop meter cells.
 - **Logo.** The home logo gets a vertical gradient built from a theme colour
   ramp.
+
+<p align="center"><img src="https://raw.githubusercontent.com/rbferreira/beautify-opencode/main/docs/img/before-after.png" alt="The same sidebar, stock on the left and with beautify-opencode on the right" width="640"></p>
 
 Everything is matched heuristically and defensively. A node that does not
 match exactly is left alone, so if OpenCode or a plugin changes its layout,
@@ -67,14 +62,18 @@ files change.
 
 ## Options
 
+<p align="center"><img src="https://raw.githubusercontent.com/rbferreira/beautify-opencode/main/docs/img/palettes.png" alt="The three palettes side by side: neon, btop and theme" width="900"></p>
+
+<p align="center"><img src="https://raw.githubusercontent.com/rbferreira/beautify-opencode/main/docs/img/logo.png" alt="The home logo stock and with three gradients: theme accent, theme blue and aurora" width="680"></p>
+
 | Option          | Default      | What it does |
 |-----------------|--------------|--------------|
 | `palette`       | `"neon"`     | `"neon"`: btop look with theme colours (box frames cycle through the theme's hues, white titles). `"btop"`: btop's exact default colours. `"theme"`: softer, frames tinted by each card's title. |
 | `cards`         | `true`       | Rounded, unified, compact card borders. |
 | `cardTitles`    | `true`       | Move each card's header into its top border. |
 | `boxBars`       | `true`       | Repaint magic-context's segmented token bar. |
-| `textBars`      | `true`       | Repaint `█░` text bars as `■` meters. |
-| `barStyle`      | `"btop"`     | `"btop"` (`■` cells) or `"glossy"` (a smooth pill). |
+| `textBars`      | `true`       | Repaint block-character text bars as meters. |
+| `barStyle`      | `"btop"`     | `"btop"` (square cells) or `"glossy"` (a smooth pill). |
 | `meterGradient` | `"progress"` | `"progress"` (green ramp) or `"usage"` (green → yellow → red). |
 | `logo`          | `true`       | Gradient on the home logo. |
 | `logoGradient`  | `"theme"`    | `"theme"`, a named gradient (`gelo`, `aurora`, `lavanda`, `brasa`, `btop`), or your own stops: `["#cfefff", "#5aa9ff"]`. |
@@ -92,7 +91,8 @@ patches the nodes it recognises:
   frame.
 - Titles and bars are painted in a post-process step after the frame is
   drawn. Sidebar sections keep their title row visible and get a box without
-  a top edge; the post-process paints `╭─┐title┌──╮` over that row. Layout is
+  a top edge; the post-process paints the top border, title included, over
+  that row. Layout is
   never changed, so a section that rebuilds itself every second (as
   Checklist-to-Goal does) cannot make the screen jump.
 - Original properties are stored on each node, and `stop()` puts them back.
@@ -107,6 +107,13 @@ need Bun; OpenCode's own binary can act as Bun:
 ```sh
 BUN_BE_BUN=1 opencode test/preview.mjs preview.html
 BUN_BE_BUN=1 opencode test/logo.mjs logo.html
+```
+
+The README images come from `docs/shots.mjs`, which renders these replicas
+with the real skin and a theme captured from a live TUI:
+
+```sh
+BUN_BE_BUN=1 opencode docs/shots.mjs   # then screenshot docs/shots.html
 ```
 
 Debug: create an empty `.debug` file next to `package.json`. The live tree
