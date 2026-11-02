@@ -98,21 +98,29 @@ export function buildSidebar(ctx, clicks = [], { width = 40, height = 44, checkl
 
 // --- home logo ---
 
-const OPEN = ["                   ", "█▀▀█ █▀▀█ █▀▀█ █▀▀▄", "█  █ █  █ █▀▀▀ █  █", "▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀"]
-const CODE = ["             ▄     ", "█▀▀▀ █▀▀█ █▀▀█ █▀▀█", "█    █  █ █  █ █▀▀▀", "▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀"]
-// Letter interiors (row 2 spaces between strokes) carry a darker shadow bg.
-const tone = {
-  open: { fg: "#7d7d7d", shadow: "#3c3c3c" },
-  code: { fg: "#eeeeee", shadow: "#5e5e5e" },
-}
+// Copied from the host (OpenCode 2.2.5): marker cells are "_" a space on the
+// shadow colour, "^" ▀ on the shadow colour, "~" ▀ drawn in the shadow colour,
+// "," ▄ drawn in the shadow colour. shadow = mix(background, fg, 0.25).
+const OPEN = ["                   ", "█▀▀█ █▀▀█ █▀▀█ █▀▀▄", "█__█ █__█ █^^^ █__█", "▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀~~▀"]
+const CODE = ["             ▄     ", "█▀▀▀ █▀▀█ █▀▀█ █▀▀█", "█___ █__█ █__█ █^^^", "▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀"]
+const LOGO_BG = [0x0a, 0x0a, 0x0a]
+const tone = { open: [0x80, 0x80, 0x80], code: [0xee, 0xee, 0xee] }
+const hexOf = (rgb) => "#" + rgb.map((v) => Math.round(v).toString(16).padStart(2, "0")).join("")
 
-function half(ctx, rows, r, t) {
+function half(ctx, rows, r, rgb, bold) {
   const box = new BoxRenderable(ctx, { flexDirection: "row", width: 19, height: 1 })
-  const line = rows[r]
-  ;[...line].forEach((ch, i) => {
-    const inLetter = r === 2 && ch === " " && line[i - 1] !== " " && i % 5 !== 4
-    box.add(new TextRenderable(ctx, { content: ch, fg: t.fg, bg: inLetter ? t.shadow : undefined }))
-  })
+  const fg = hexOf(rgb)
+  const shadow = hexOf(LOGO_BG.map((b, i) => b + (rgb[i] - b) * 0.25))
+  const attributes = bold ? 1 : 0
+  for (const ch of rows[r]) {
+    const cell =
+      ch === "_" ? { content: " ", fg, bg: shadow }
+      : ch === "^" ? { content: "▀", fg, bg: shadow }
+      : ch === "~" ? { content: "▀", fg: shadow }
+      : ch === "," ? { content: "▄", fg: shadow }
+      : { content: ch, fg }
+    box.add(new TextRenderable(ctx, { ...cell, attributes }))
+  }
   return box
 }
 
@@ -121,8 +129,8 @@ export function logo(ctx) {
   const box = new BoxRenderable(ctx, { flexDirection: "column", width: 39, height: 4, flexShrink: 0 })
   for (let r = 0; r < 4; r++) {
     const line = new BoxRenderable(ctx, { flexDirection: "row", width: 39, height: 1, gap: 1 })
-    line.add(half(ctx, OPEN, r, tone.open))
-    line.add(half(ctx, CODE, r, tone.code))
+    line.add(half(ctx, OPEN, r, tone.open, false))
+    line.add(half(ctx, CODE, r, tone.code, true))
     box.add(line)
   }
   return box
